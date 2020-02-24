@@ -5,6 +5,9 @@ module.exports = app =>{
     const HomeInfo = require('../../models/HomeInfo')
     const Detail = require('../../models/Detail')
     const Recommend = require('../../models/Recommend')
+    const Category = require('../../models/Category')
+    const SubCategory = require('../../models/SubCategory')
+    const CategoryDetail = require('../../models/CategoryDetail')
 
     // const Banner = require('../../models/Banner')
     // const Activity = require('../../models/Activity')
@@ -31,6 +34,18 @@ module.exports = app =>{
     })
     router.get('/detail/:iid',async (req,res)=>{
         const items = await Detail.findOne({"iid":req.params.iid})
+        res.send(items)
+    })
+    router.get('/category',async (req,res)=>{
+        const items = await Category.find()
+        res.send(items)
+    })
+    router.get('/subcategory/:maitKey',async (req,res)=>{
+        const items = await SubCategory.find({"maitKey":req.params.maitKey})
+        res.send(items)
+    })
+    router.get('/categorydetail/:miniWallkey/:type',async (req,res)=>{
+        const items = await CategoryDetail.find({"miniWallkey":req.params.miniWallkey,"type":req.params.type})
         res.send(items)
     })
     app.use('/mall/api',router)//将子路由挂载上去
