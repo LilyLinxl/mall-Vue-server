@@ -8,6 +8,8 @@ module.exports = app =>{
     const Category = require('../../models/Category')
     const SubCategory = require('../../models/SubCategory')
     const CategoryDetail = require('../../models/CategoryDetail')
+    const User = require('../../models/User')
+    const assert = require('http-assert')
 
     // const Banner = require('../../models/Banner')
     // const Activity = require('../../models/Activity')
@@ -47,6 +49,22 @@ module.exports = app =>{
     router.get('/categorydetail/:miniWallkey/:type',async (req,res)=>{
         const items = await CategoryDetail.find({"miniWallkey":req.params.miniWallkey,"type":req.params.type})
         res.send(items)
+    })
+    //登录
+    app.post('/mall/api/login',async (req,res)=> {
+        const {username,password} = req.body
+        const user = await (await (await User.findOne({username})))
+        if(!user){
+            const model = await User.create(req.body)
+            res.send('success register')
+        }
+        res.send('success login')
+    })
+    
+    app.use(async(err,req,res,next) => {
+        res.status(err.statusCode||401).send({
+            message:err.message
+        })
     })
     app.use('/mall/api',router)//将子路由挂载上去
 }
