@@ -10,18 +10,7 @@ module.exports = app =>{
     const CategoryDetail = require('../../models/CategoryDetail')
     const User = require('../../models/User')
     const assert = require('http-assert')
-
-    // const Banner = require('../../models/Banner')
-    // const Activity = require('../../models/Activity')
-  
-    // router.get('/home/banner',async (req,res)=>{
-    //     const items = await Banner.find().limit(4)
-    //     res.send(items)
-    // })
-    // router.get('/home/activity',async (req,res)=>{
-    //     const items = await Activity.find().limit(4)
-    //     res.send(items)
-    // })
+    const jwt = require('jsonwebtoken')
     router.get('/homeInfo',async (req,res)=>{
         const items = await HomeInfo.find()
         res.send(items)
@@ -52,13 +41,38 @@ module.exports = app =>{
     })
     //登录
     app.post('/mall/api/login',async (req,res)=> {
+     
         const {username,password} = req.body
-        const user = await (await (await User.findOne({username})))
+        // 1.根据用户名找用户
+        const user = await (await User.findOne({username}).select('+password'))
+        assert(user,422,{message:'用户不存在'})
+        // 2.校验密码
+        const isValid = require('bcrypt').compareSync(password,user.password)
+        assert(isValid,422,'密码错误')
+        // 3.返回token
+        const token = jwt.sign({id:user._id},app.get('secret'))
+        res.send(
+            {
+                token:token,
+                username:username,
+                id:user._id
+            })
+    })
+    app.post('/mall/api/register',async (req,res)=>{
+        const {username,password} = req.body
+        const user = await User.findOne({username})
         if(!user){
             const model = await User.create(req.body)
-            res.send('success register')
+            res.send({
+                code:200,
+                msg:'注册成功'
+            })
+        }else{
+            res.send({
+                code:422,
+                msg:'该用户名已存在'
+            })
         }
-        res.send('success login')
     })
     
     app.use(async(err,req,res,next) => {

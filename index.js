@@ -1,7 +1,7 @@
 const express = require('express')
 
 const app = express()
-
+app.set('secret','i2jdso393jcjsksk')//设置全局秘钥
 app.use(require('cors')())//引入跨域模块
 app.use(express.json())
 require('./routes/mall')(app)//外部引入并传入app
